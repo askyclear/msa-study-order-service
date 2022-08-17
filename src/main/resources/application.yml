@@ -9,12 +9,6 @@ spring:
       settings:
         web-allow-others: true
       path: /h2-console
-  datasource:
-    hikari:
-      driver-class-name: org.mariadb.jdbc.Driver
-      jdbc-url: jdbc:mariadb://localhost:3306/mydb
-      username: root
-      password: test1357
   jpa:
     show-sql: true
     hibernate:
