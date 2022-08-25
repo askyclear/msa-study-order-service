@@ -2,10 +2,12 @@ POST http://localhost:8000/order/65bf4998-4b63-403c-abd1-4e32126003d3/orders
 Content-Type: application/json
 
 {
-  "productId" : "CATALOG-001"
+  "productId" : "CATALOG-002"
   , "qty" : 5
   , "unitPrice" : 1000
 }
 
 ###
 GET http://localhost:8000/order/65bf4998-4b63-403c-abd1-4e32126003d3/orders
+
+

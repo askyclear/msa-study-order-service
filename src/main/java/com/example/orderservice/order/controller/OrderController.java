@@ -3,6 +3,7 @@ package com.example.orderservice.order.controller;
 import com.example.orderservice.order.dto.OrderDto;
 import com.example.orderservice.order.entity.OrderEntity;
 import com.example.orderservice.order.messagequeue.KafkaProducer;
+import com.example.orderservice.order.messagequeue.OrderProducer;
 import com.example.orderservice.order.service.OrderService;
 import com.example.orderservice.order.vo.RequestOrder;
 import com.example.orderservice.order.vo.ResponseOrder;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class OrderController {
@@ -21,12 +23,14 @@ public class OrderController {
     private final OrderService orderService;
     private final Environment environment;
     private final KafkaProducer kafkaProducer;
+    private final OrderProducer orderProducer;
 
-    public OrderController(ModelMapper modelMapper, OrderService orderService, Environment environment, KafkaProducer kafkaProducer) {
+    public OrderController(ModelMapper modelMapper, OrderService orderService, Environment environment, KafkaProducer kafkaProducer, OrderProducer orderProducer) {
         this.modelMapper = modelMapper;
         this.orderService = orderService;
         this.environment = environment;
         this.kafkaProducer = kafkaProducer;
+        this.orderProducer = orderProducer;
     }
 
     @GetMapping("/health_check")
@@ -38,11 +42,14 @@ public class OrderController {
     public ResponseEntity<ResponseOrder> createOrder(@RequestBody RequestOrder order, @PathVariable String userId) {
         OrderDto orderDto = modelMapper.map(order, OrderDto.class);
         orderDto.setUserId(userId);
-        OrderDto createdOrder = orderService.createOrder(orderDto);
+        orderDto.setOrderId(UUID.randomUUID().toString());
+        orderDto.setTotalPrice(order.getQty() * order.getUnitPrice());
+//        OrderDto createdOrder = orderService.createOrder(orderDto);
 
         kafkaProducer.send(environment.getProperty("kafka.catalog-topic"), orderDto);
+        orderProducer.send(environment.getProperty("kafka.orders"), orderDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(createdOrder, ResponseOrder.class));
+        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(orderDto, ResponseOrder.class));
 
     }
 
