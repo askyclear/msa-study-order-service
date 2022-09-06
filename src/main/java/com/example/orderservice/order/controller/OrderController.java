@@ -44,12 +44,12 @@ public class OrderController {
         orderDto.setUserId(userId);
         orderDto.setOrderId(UUID.randomUUID().toString());
         orderDto.setTotalPrice(order.getQty() * order.getUnitPrice());
-//        OrderDto createdOrder = orderService.createOrder(orderDto);
+        OrderDto createdOrder = orderService.createOrder(orderDto);
 
         kafkaProducer.send(environment.getProperty("kafka.catalog-topic"), orderDto);
-        orderProducer.send(environment.getProperty("kafka.orders"), orderDto);
+//        orderProducer.send(environment.getProperty("kafka.orders"), orderDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(orderDto, ResponseOrder.class));
+        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(createdOrder, ResponseOrder.class));
 
     }
 
